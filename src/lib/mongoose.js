@@ -20,12 +20,14 @@ export const connectDB = async () => {
 
   if (!cached.promise) {
     console.log("🔌 Connecting to MongoDB...");
+    console.log("🔍 Connection string being used:", MONGODB_URI.replace(/:([^:@]{1,10})@/, ':****@')); // Hide password in logs
     cached.promise = mongoose
       .connect(MONGODB_URI, {
         dbName: "tourney-techs",
       })
       .then((mongoose) => {
         console.log("✅ MongoDB connected:", mongoose.connection.name);
+        console.log("✅ Database name:", mongoose.connection.db.namespace);
         return mongoose;
       })
       .catch((err) => {
