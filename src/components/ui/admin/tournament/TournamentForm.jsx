@@ -122,7 +122,7 @@ export default function TournamentForm({ initialData, onClose, onSuccess }) {
     setGameFields((prev) => [
       {
         game: "",
-        entryFee: 0,
+        entryFee: "",
         format: "double_elimination",
         teamBased: false,
         tournamentTeamType: "double_player",
@@ -207,7 +207,7 @@ export default function TournamentForm({ initialData, onClose, onSuccess }) {
       }
 
       const validGames = gameFields.filter(
-        (g) => g.game && !isNaN(g.entryFee) && g.tournamentTeamType
+        (g) => g.game && (g.entryFee === "" || !isNaN(g.entryFee)) && g.tournamentTeamType
       );
 
       const jsonPayload = {
@@ -490,7 +490,7 @@ export default function TournamentForm({ initialData, onClose, onSuccess }) {
               {/* Entry Fee */}
               <input
                 type="number"
-                placeholder="Entry Fee"
+                placeholder="please input fee in $"
                 value={field.entryFee}
                 onChange={(e) =>
                   handleGameFieldChange(index, "entryFee", e.target.value)
