@@ -96,6 +96,13 @@ export const POST = asyncHandler(async (req) => {
     )
   );
 
+  console.log("Setting auth cookies - AccessToken:", !!accessToken, "RefreshToken:", !!refreshToken);
+
   // ✅ Set cookies before returning response
-  return setAuthCookies(res, accessToken, refreshToken);
+  const response = setAuthCookies(res, accessToken, refreshToken);
+
+  // Debug: Check if cookies were set
+  console.log("Cookies in response headers:", response.cookies ? "Cookies present" : "No cookies");
+
+  return response;
 });

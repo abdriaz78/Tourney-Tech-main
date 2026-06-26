@@ -66,29 +66,56 @@ export function verifyRefreshToken(token) {
 }
 
 /**
+ * Helper function to convert time string to seconds
+ * Examples: "15m" -> 900, "7d" -> 604800
+ */
+function timeToSeconds(timeString) {
+  const unit = timeString.slice(-1);
+  const value = parseInt(timeString.slice(0, -1));
+
+  switch (unit) {
+    case 's': return value;
+    case 'm': return value * 60;
+    case 'h': return value * 60 * 60;
+    case 'd': return value * 60 * 60 * 24;
+    default: return value;
+  }
+}
+
+/**
  * Sets access and refresh tokens as secure HTTP-only cookies
  *
  * @param {string} accessToken
  * @param {string} refreshToken
  */
 export function setAuthCookies(response, accessToken, refreshToken) {
-  // const cookieStore = cookies();
+  const isProduction = process.env.NODE_ENV === "production";
 
+  // In development, be more permissive with cookies
+  const sameSiteValue = isProduction ? "strict" : "lax";
+  const secureValue = isProduction;
+
+  console.log("Setting cookies in", isProduction ? "production" : "development", "mode");
+
+  // Set access token cookie
   response.cookies.set("accessToken", accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: ACCESS_EXPIRES_IN,
+    secure: secureValue,
+    sameSite: sameSiteValue,
+    maxAge: timeToSeconds(ACCESS_EXPIRES_IN),
     path: "/",
   });
 
+  // Set refresh token cookie
   response.cookies.set("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: REFRESH_EXPIRES_IN,
+    secure: secureValue,
+    sameSite: sameSiteValue,
+    maxAge: timeToSeconds(REFRESH_EXPIRES_IN),
     path: "/",
   });
+
+  console.log("Cookies set successfully");
 
   return response;
 }

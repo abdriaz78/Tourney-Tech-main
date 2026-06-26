@@ -18,7 +18,7 @@ export const config = {
 export const PATCH = asyncHandler(async (req, context) => {
   await requireAdmin(); // Only global admin can update tournaments
 
-  const { id } = context.params;
+  const { id } = await context.params;
   const tournament = await Tournament.findById(id);
   if (!tournament) throw new ApiError(404, "Tournament not found");
 
@@ -90,7 +90,7 @@ export const GET = asyncHandler(async (req, context) => {
 
 // DELETE /api/tournaments/[id]
 export const DELETE = asyncHandler(async (req, context) => {
-  await requireAdmin(req);
+  await requireAdmin();
   const { id } = await context.params;
 
   const tournament = await Tournament.findByIdAndDelete(id);

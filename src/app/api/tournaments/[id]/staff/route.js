@@ -10,6 +10,64 @@ import { ApiResponse } from "@/utils/server/ApiResponse";
 const allowedRoles = ["owner", "organizer", "manager", "support"];
 
 // POST /api/tournaments/[id]/staff
+export const POST = asyncHandler(async (req, context) => {
+  const authUser = await requireAuth(req);
+  const { id: tournamentId } = await context.params;
+  const { fields } = await parseForm(req);
+
+  const userId = fields?.userId?.toString();
+  const role = fields?.role?.toString();
+
+  if (!userId || !role) throw new ApiError(400, "userId and role are required");
+  if (!allowedRoles.includes(role)) throw new ApiError(400, "Invalid role");
+
+  const tournament = await Tournament.findById(tournamentId);
+  if (!tournament) throw new ApiError(404, "Tournament not found");
+
+  const requester = await User.findById(authUser._id).lean();
+  const isAdmin = requester?.role === "admin";
+
+  const requesterStaffRole = tournament.staff.find(
+    (m) => m.user.toString() === authUser._id.toString()
+  )?.role;
+
+  if (!isAdmin) {
+    if (requesterStaffRole === "owner") {
+      if (role === "owner") {
+        throw new ApiError(403, "Owner cannot assign another owner");
+      }
+    } else if (requesterStaffRole === "organizer") {
+      if (["owner", "organizer"].includes(role)) {
+        throw new ApiError(
+          403,
+          "Organizer cannot assign owner or other organizers"
+        );
+      }
+    } else {
+      throw new ApiError(403, "You are not allowed to modify staff");
+    }
+  }
+
+  const existing = tournament.staff.find((m) => m.user.toString() === userId);
+
+  if (existing) {
+    existing.role = role;
+  } else {
+    if (role === "owner" && tournament.staff.some((m) => m.role === "owner")) {
+      throw new ApiError(400, "Tournament already has an owner");
+    }
+
+    tournament.staff.push({ user: userId, role });
+  }
+
+  await tournament.save();
+
+  return Response.json(
+    new ApiResponse(200, tournament, "Tournament staff updated successfully")
+  );
+});
+
+// PATCH /api/tournaments/[id]/staff
 export const PATCH = asyncHandler(async (req, context) => {
   const authUser = await requireAuth(req);
   const { id: tournamentId } = await context.params;
@@ -25,7 +83,7 @@ export const PATCH = asyncHandler(async (req, context) => {
   if (!tournament) throw new ApiError(404, "Tournament not found");
 
   const requester = await User.findById(authUser._id).lean();
-  const isAdmin = requester?.roles?.includes("admin");
+  const isAdmin = requester?.role === "admin";
 
   const requesterStaffRole = tournament.staff.find(
     (m) => m.user.toString() === authUser._id.toString()
@@ -80,7 +138,7 @@ export const DELETE = asyncHandler(async (req, context) => {
   if (!tournament) throw new ApiError(404, "Tournament not found");
 
   const requester = await User.findById(authUser._id).lean();
-  const isAdmin = requester?.roles?.includes("admin");
+  const isAdmin = requester?.role === "admin";
 
   const targetMember = tournament.staff.find(
     (m) => m.user.toString() === userId
@@ -147,7 +205,7 @@ export const GET = asyncHandler(async (req, context) => {
   if (!tournament) throw new ApiError(404, "Tournament not found");
 
   const requester = await User.findById(authUser._id).lean();
-  const isAdmin = requester?.roles?.includes("admin");
+  const isAdmin = requester?.role === "admin";
 
   const requesterStaffRole = tournament.staff.find(
     (m) => m.user._id.toString() === authUser._id.toString()

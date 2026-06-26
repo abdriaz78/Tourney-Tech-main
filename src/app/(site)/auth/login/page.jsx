@@ -26,12 +26,18 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
+      console.log("Attempting login with email:", email);
+
       const res = await api.post("/api/login", {
         email,
         password,
       });
 
       const { user } = res.data.data;
+
+      console.log("Login successful, user:", user);
+      console.log("Response headers:", res.headers);
+      console.log("Response cookies:", res.headers['set-cookie']);
 
       // Tokens are automatically set as HTTP-only cookies by the server
       // No need to store them in localStorage
@@ -41,13 +47,22 @@ export default function LoginPage() {
 
       toast.success("Login successful!");
 
-      // ✅ Redirect based on role
-      if (user.role === "admin") {
-        window.location.href = "/admin";
-      } else {
-        window.location.href = "/dashboard";
-      }
+      // ✅ Wait a moment for cookies to be set before redirecting
+      setTimeout(() => {
+        // Debug: Check if cookies are set in the browser
+        console.log("Checking cookies before redirect...");
+        console.log("document.cookie:", document.cookie);
+
+        // ✅ Redirect based on role
+        if (user.role === "admin") {
+          window.location.href = "/admin";
+        } else {
+          window.location.href = "/dashboard";
+        }
+      }, 500); // Wait 500ms
     } catch (error) {
+      console.error("Login error:", error);
+      console.error("Error response:", error?.response);
       const errorMessage =
         error?.response?.data?.message || "Login failed. Please try again.";
       toast.error(errorMessage);

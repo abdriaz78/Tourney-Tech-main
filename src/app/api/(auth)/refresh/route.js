@@ -21,7 +21,10 @@ export const POST = asyncHandler(async () => {
   const cookieStore = await cookies();
   const incomingRefreshToken = cookieStore.get("refreshToken")?.value;
 
+  console.log("Refresh token attempt - Token present:", !!incomingRefreshToken);
+
   if (!incomingRefreshToken) {
+    console.log("Refresh token missing from cookies");
     throw new ApiError(401, "Refresh token is missing.");
   }
 

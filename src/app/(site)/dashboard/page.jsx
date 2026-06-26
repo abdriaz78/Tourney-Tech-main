@@ -8,6 +8,7 @@ import TournamentFilters from "@/components/ui/tournaments/TournamentFilters";
 
 export default function TournamentListing() {
   const [tournaments, setTournaments] = useState([]);
+  const [userTournaments, setUserTournaments] = useState({}); // Store user's role in each tournament
   const [selectedId, setSelectedId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -32,6 +33,27 @@ export default function TournamentListing() {
     };
 
     fetchTournaments();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserTournaments = async () => {
+      try {
+        const res = await api.get("/api/tournaments/my-tournaments");
+        const myTournaments = res.data.data || [];
+
+        // Create a map of tournament ID to user's role
+        const tournamentRoleMap = {};
+        myTournaments.forEach((tournament) => {
+          tournamentRoleMap[tournament._id] = tournament.userRole;
+        });
+
+        setUserTournaments(tournamentRoleMap);
+      } catch (err) {
+        console.error("Failed to fetch user tournaments:", err);
+      }
+    };
+
+    fetchUserTournaments();
   }, []);
 
   const handleFilterChange = (e) => {
@@ -115,6 +137,7 @@ export default function TournamentListing() {
             {...tournament}
             selectedId={selectedId}
             onSelect={setSelectedId}
+            userRole={userTournaments[tournament._id]} // Pass user's role in this tournament
           />
         ))}
       </div>

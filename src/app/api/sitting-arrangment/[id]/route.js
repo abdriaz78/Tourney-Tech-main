@@ -11,7 +11,7 @@ import { parseForm } from "@/utils/server/parseForm";
 
 export const DELETE = asyncHandler(async (_, context) => {
   const user = await requireAuth();
-  const id = context.params.id;
+  const { id } = await context.params;
 
   if (!id) {
     throw new ApiError(400, "ID is required");
@@ -38,7 +38,7 @@ export const PATCH = asyncHandler(async (req, context) => {
   // const { fields, files } = await parseForm(req);
   const { fields } = await parseForm(req);
 
-  const sittingArrangementId = context.params?.id;
+  const { id: sittingArrangementId } = await context.params;
   const tournamentId = fields.tournamentId?.toString();
   const gameId = fields.gameId?.toString();
   const galleryId = fields.galleryId?.toString();

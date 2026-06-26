@@ -15,6 +15,7 @@ export default function TournamentCard({
   status,
   selectedId,
   onSelect,
+  userRole, // New prop to indicate if user is organizer/owner/admin
 }) {
   const isSelected = selectedId === _id;
 
@@ -93,8 +94,22 @@ export default function TournamentCard({
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 mt-3">
-          {status === "upcoming" ? (
-            // ✅ Show Register Now only for upcoming
+          {userRole ? (
+            // ✅ Show View Details for organizers/admins/staff
+            <Link href={`/dashboard/tournament-details/${_id}`} className="flex-1">
+              <button
+                onClick={() => onSelect(_id)}
+                className="w-full py-2 rounded-lg font-semibold transition hover:scale-[1.01]"
+                style={{
+                  backgroundColor: "var(--info-color)",
+                  color: "white",
+                }}
+              >
+                View Details
+              </button>
+            </Link>
+          ) : status === "upcoming" ? (
+            // ✅ Show Register Now only for upcoming regular users
             <Link
               href={`/dashboard/game-registration/${_id}`}
               className="flex-1"

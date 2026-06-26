@@ -5,7 +5,7 @@ import { useState } from "react";
 import DashboardNavbar from "@/components/ui/dashboard/DashboardNavbar";
 import DashboardSidebar from "@/components/ui/dashboard/DashboardSidebar";
 
-import { LayoutDashboard, Users, LogOut, BellDot,SquareChartGantt } from "lucide-react";
+import { LayoutDashboard, Users, LogOut, BellDot,SquareChartGantt, Trophy } from "lucide-react";
 
 import UserGuard from "@/components/gard/user/UserGard";
 
@@ -14,6 +14,7 @@ import RequestToaster from "@/components/ui/dashboard/RequestToaster";
 // Change this to adminNavItems if needed
 const userNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard/my-tournaments", label: "My Tournaments", icon: Trophy },
   { href: "/dashboard/profile", label: "Profile", icon: Users },
   { href: "/dashboard/teamup", label: "Team Up", icon: Users },
    {

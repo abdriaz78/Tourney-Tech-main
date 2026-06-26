@@ -24,6 +24,9 @@ export const connectDB = async () => {
     cached.promise = mongoose
       .connect(MONGODB_URI, {
         dbName: "tourney-techs",
+        serverSelectionTimeoutMS: 10000, // 10 second timeout
+        socketTimeoutMS: 45000, // 45 second socket timeout
+        family: 4, // Use IPv4, skip trying IPv6
       })
       .then((mongoose) => {
         console.log("✅ MongoDB connected:", mongoose.connection.name);

@@ -16,7 +16,7 @@ function getStageName(numTeams, round) {
 
 export const PATCH = asyncHandler(async (req, context) => {
   const user = await requireAuth(req);
-  const matchId = context.params.id;
+  const { id: matchId } = await context.params;
   const { fields } = await parseForm(req);
   const {
     teamAScore,
