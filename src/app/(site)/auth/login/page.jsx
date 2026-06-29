@@ -14,12 +14,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Clear previous errors
+    setError("");
+
     if (!email || !password) {
-      toast.error("Please enter both email and password.");
+      const errorMsg = "Please enter both email and password.";
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
@@ -63,8 +69,33 @@ export default function LoginPage() {
     } catch (error) {
       console.error("Login error:", error);
       console.error("Error response:", error?.response);
-      const errorMessage =
-        error?.response?.data?.message || "Login failed. Please try again.";
+
+      // Handle different types of errors
+      let errorMessage = "Login failed. Please try again.";
+
+      if (error?.response) {
+        // Server responded with error
+        const serverError = error?.response?.data?.message;
+        const statusCode = error?.response?.status;
+
+        if (statusCode === 401) {
+          errorMessage = serverError || "Invalid email or password.";
+        } else if (statusCode === 404) {
+          errorMessage = serverError || "User not found. Please check your credentials.";
+        } else if (statusCode === 400) {
+          errorMessage = serverError || "Invalid request. Please check your input.";
+        } else {
+          errorMessage = serverError || errorMessage;
+        }
+      } else if (error?.request) {
+        // Request made but no response
+        errorMessage = "Network error. Please check your connection.";
+      } else {
+        // Something else happened
+        errorMessage = error?.message || errorMessage;
+      }
+
+      setError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setLoading(false); // ✅ ensures it hides in both success & error
@@ -95,6 +126,15 @@ export default function LoginPage() {
             Login to Tourney Tech
           </h1>
 
+          {/* Error Message Display */}
+          {error && (
+            <div
+              className="mb-4 p-3 rounded-lg text-sm bg-red-500/10 border border-red-500/50 text-red-500"
+            >
+              <p className="font-medium">{error}</p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block mb-2 text-sm font-medium">
@@ -105,12 +145,15 @@ export default function LoginPage() {
                 id="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (error) setError(""); // Clear error when user starts typing
+                }}
                 className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2"
                 style={{
                   backgroundColor: "var(--secondary-color)",
                   color: "var(--foreground)",
-                  borderColor: "var(--border-color)",
+                  borderColor: error ? "red" : "var(--border-color)",
                   caretColor: "var(--accent-color)",
                 }}
               />
@@ -140,7 +183,10 @@ export default function LoginPage() {
               <PasswordInput
                 label="Password"
                 value={password}
-                onChange={setPassword}
+                onChange={(value) => {
+                  setPassword(value);
+                  if (error) setError(""); // Clear error when user starts typing
+                }}
               />
 
               <div className="mt-1 ">

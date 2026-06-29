@@ -47,7 +47,11 @@ api.interceptors.response.use(
 
     console.log("Response interceptor error:", error.response?.status, "URL:", error.config?.url);
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Don't try to refresh tokens for these endpoints
+    const skipRefreshUrls = ['/api/login', '/api/register', '/api/refresh'];
+    const shouldSkipRefresh = skipRefreshUrls.some(url => originalRequest.url?.includes(url));
+
+    if (error.response?.status === 401 && !originalRequest._retry && !shouldSkipRefresh) {
       originalRequest._retry = true;
 
       if (isRefreshing) {
