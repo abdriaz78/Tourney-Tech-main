@@ -30,10 +30,20 @@ export default function ManageUsers() {
   }, []);
 
   // ✅ Called after create/edit
-  const handleFormSuccess = () => {
+  const handleFormSuccess = (userData) => {
     setShowForm(false);
     setEditingUser(null);
-    fetchUsers();
+    if (userData) {
+      setUsers(prev => {
+        const exists = prev.find(u => u._id === userData._id);
+        if (exists) {
+          return prev.map(u => u._id === userData._id ? userData : u);
+        }
+        return [...prev, userData];
+      });
+    } else {
+      fetchUsers();
+    }
   };
 
   // ✅ Called after delete

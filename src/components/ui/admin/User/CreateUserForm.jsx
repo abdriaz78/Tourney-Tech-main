@@ -81,7 +81,7 @@ export default function UserFormModal({ user = null, onSuccess, onClose }) {
           });
 
       toast.success(res.data.message || (isEdit ? "User updated!" : "User created!"));
-      onSuccess?.();
+      onSuccess?.(res.data.data?.user);
       onClose?.(); // close modal after success
     } catch (error) {
       console.error(error);
