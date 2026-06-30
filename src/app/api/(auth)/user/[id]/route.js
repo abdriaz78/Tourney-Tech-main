@@ -3,6 +3,7 @@ import { requireAdmin } from "@/utils/server/roleGuards";
 import { parseForm } from "@/utils/server/parseForm";
 import { User } from "@/models/User";
 import { ApiResponse } from "@/utils/server/ApiResponse";
+import { ApiError } from "@/utils/server/ApiError";
 import bcrypt from "bcrypt";
 
 export const PATCH = asyncHandler(async (req, context) => {
@@ -16,7 +17,7 @@ export const PATCH = asyncHandler(async (req, context) => {
   const userExist = await User.findById(id);
 
   if (!userExist) {
-    throw new ApiResponse(404, null, "user not exist");
+    throw new ApiError(404, "user not exist");
   }
 
   if (fields.password) {
