@@ -7,6 +7,7 @@ import { toast } from "react-hot-toast";
 import RoundOneMatches from "@/components/ui/dashboard/matches/RoundOne";
 import RoundTwoBracket from "@/components/ui/dashboard/matches/RoundTwo";
 import SeatingChart from "@/components/ui/dashboard/matches/SeatingChart";
+import MeshRoundsView from "@/components/ui/dashboard/matches/MeshRoundsView";
 
 import Link from "next/link";
 
@@ -495,9 +496,11 @@ export default function TournamentPage() {
       {(isScoreBased ? round1Matches.length > 0 : mainBracketMatches.length > 0) && (
         <section>
           <h2 className="text-2xl font-bold text-white mb-4">
-            Round 1 Matches
+            {gameConfig?.format === "mesh" ? "Mesh Rounds" : "Round 1 Matches"}
           </h2>
-          {isScoreBased ? (
+          {gameConfig?.format === "mesh" ? (
+            <MeshRoundsView matches={round1Matches} onUpdate={handleRound1Update} />
+          ) : isScoreBased ? (
             <RoundOneMatches
               matches={round1Matches}
               onUpdate={handleRound1Update}
